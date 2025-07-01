@@ -1,12 +1,24 @@
 <main>
   <h1>Multi-Choice Quiz</h1>
   
-  <div *ngIf="questions.length === 0">
-    <p>No questions available.</p>
-    <button (click)="loadSampleQuestions()">Load Sample Questions</button>
+  <div *ngIf="!showQuiz">
+    <div class="main-screen">
+      <h2>Welcome to the Quiz!</h2>
+      <div *ngIf="questions.length === 0">
+        <p>No questions available.</p>
+        <button (click)="loadSampleQuestions()">Load Sample Questions</button>
+        <button class="add-btn" (click)="showAddQuestionForm()">Add Your Own Question</button>
+      </div>
+      <div *ngIf="questions.length > 0">
+        <p>Ready to test your knowledge? This quiz has {{questions.length}} questions.</p>
+        <button class="start-btn" (click)="startQuiz()">Start Quiz</button>
+        <button class="add-btn" (click)="showAddQuestionForm()">Add Your Own Question</button>
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="questions.length > 0 && !quizCompleted">
+  <div *ngIf="showQuiz && questions.length > 0 && !quizCompleted">
+    <button class="back-btn" (click)="backToMain()">← Back to Main</button>
     <div class="question-header">
       <h2>Question {{currentQuestionIndex + 1}} of {{questions.length}}</h2>
       <div class="score">Score: {{score}}/{{currentQuestionIndex}}</div>
@@ -70,12 +82,51 @@
     </div>
   </div>
 
-  <div *ngIf="quizCompleted" class="final-score">
+  <div *ngIf="showQuiz && quizCompleted" class="final-score">
     <h2>Quiz Complete!</h2>
     <div class="score-display">
       <h3>Your Score: {{score}}/{{questions.length}}</h3>
       <p>{{(score/questions.length*100).toFixed(0)}}%</p>
     </div>
     <button (click)="restartQuiz()">Take Quiz Again</button>
+    <button (click)="backToMain()">Back to Main</button>
+  </div>
+  <div *ngIf="showAddQuestion" class="add-question-form">
+    <h2>Add New Question</h2>
+    <form (ngSubmit)="addQuestion()">
+      <div class="form-group">
+        <label>Question:</label>
+        <input type="text" [(ngModel)]="newQuestion.question" name="question" required>
+      </div>
+      <div class="form-group">
+        <label>Option A:</label>
+        <input type="text" [(ngModel)]="newQuestion.optionA" name="optionA" required>
+      </div>
+      <div class="form-group">
+        <label>Option B:</label>
+        <input type="text" [(ngModel)]="newQuestion.optionB" name="optionB" required>
+      </div>
+      <div class="form-group">
+        <label>Option C:</label>
+        <input type="text" [(ngModel)]="newQuestion.optionC" name="optionC" required>
+      </div>
+      <div class="form-group">
+        <label>Option D:</label>
+        <input type="text" [(ngModel)]="newQuestion.optionD" name="optionD" required>
+      </div>
+      <div class="form-group">
+        <label>Correct Answer:</label>
+        <select [(ngModel)]="newQuestion.correctAnswer" name="correctAnswer">
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="submit" [disabled]="!newQuestion.question.trim()">Add Question</button>
+        <button type="button" (click)="backToMain()">Cancel</button>
+      </div>
+    </form>
   </div>
 </main>

@@ -116,3 +116,91 @@ main {
   font-weight: bold;
   color: #333;
 }
+
+.main-screen {
+  text-align: center;
+  padding: 40px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.start-btn {
+  padding: 15px 30px;
+  font-size: 18px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.start-btn:hover {
+  background: #218838;
+}
+
+.back-btn {
+  padding: 8px 16px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.back-btn:hover {
+  background: #5a6268;
+}
+
+.final-score button {
+  margin: 0 10px;
+}
+
+.add-btn {
+  padding: 10px 20px;
+  background: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.add-btn:hover {
+  background: #138496;
+}
+
+.add-question-form {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-actions {
+  margin-top: 20px;
+}
+
+.form-actions button {
+  margin-right: 10px;
+}

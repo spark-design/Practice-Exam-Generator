@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../../amplify/data/resource';
 import { addSampleQuestions } from './sample-questions';
@@ -9,7 +10,7 @@ const client = generateClient<Schema>();
 @Component({
   selector: 'app-quiz',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './quiz.component.html',
   styleUrl: './quiz.component.css',
 })
@@ -20,6 +21,16 @@ export class QuizComponent implements OnInit {
   score = 0;
   showResult = false;
   quizCompleted = false;
+  showQuiz = false;
+  showAddQuestion = false;
+  newQuestion = {
+    question: '',
+    optionA: '',
+    optionB: '',
+    optionC: '',
+    optionD: '',
+    correctAnswer: 'A'
+  };
 
   ngOnInit(): void {
     this.loadQuestions();
@@ -67,6 +78,39 @@ export class QuizComponent implements OnInit {
     this.score = 0;
     this.showResult = false;
     this.quizCompleted = false;
+  }
+
+  startQuiz() {
+    this.showQuiz = true;
+  }
+
+  backToMain() {
+    this.showQuiz = false;
+    this.showAddQuestion = false;
+    this.restartQuiz();
+  }
+
+  showAddQuestionForm() {
+    this.showAddQuestion = true;
+  }
+
+  async addQuestion() {
+    if (!this.newQuestion.question.trim()) return;
+    
+    try {
+      await client.models.Question.create(this.newQuestion);
+      this.newQuestion = {
+        question: '',
+        optionA: '',
+        optionB: '',
+        optionC: '',
+        optionD: '',
+        correctAnswer: 'A'
+      };
+      this.showAddQuestion = false;
+    } catch (error) {
+      console.error('Error adding question:', error);
+    }
   }
 
   get currentQuestion() {
