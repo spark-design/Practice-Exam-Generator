@@ -175,11 +175,17 @@ export class QuizComponent implements OnInit {
       
       // Read correct answer (can be multiple letters like AC, BD, etc.)
       let correctAnswer = '';
-      if (i < lines.length && lines[i].match(/^[ABCD]+$/)) {
-        correctAnswer = lines[i];
-        i++;
+      if (i < lines.length) {
+        const answerLine = lines[i].trim();
+        if (answerLine.match(/^[ABCD]+$/)) {
+          correctAnswer = answerLine;
+          console.log(`Found answer: "${correctAnswer}" (${correctAnswer.length > 1 ? 'multi-select' : 'single'})`);
+          i++;
+        } else {
+          console.warn(`Invalid answer format at line ${i + 1}: "${answerLine}" (expected format: A, B, C, D, AB, AC, etc.)`);
+        }
       } else {
-        console.warn(`Missing or invalid answer at line ${i + 1}: "${lines[i]}"`);
+        console.warn(`No answer found after options`);
       }
       
       // Skip empty lines
@@ -201,11 +207,16 @@ export class QuizComponent implements OnInit {
           optionD: options.D,
           correctAnswer
         });
+        console.log(`Added question with answer: ${correctAnswer}`);
       } else {
         console.warn(`Skipped invalid question:`, {
-          questionLines: questionLines.length,
-          options,
-          correctAnswer
+          hasQuestionText: questionLines.length > 0,
+          hasOptionA: !!options.A,
+          hasOptionB: !!options.B,
+          hasOptionC: !!options.C,
+          hasOptionD: !!options.D,
+          hasCorrectAnswer: !!correctAnswer,
+          correctAnswer: correctAnswer
         });
       }
     }
