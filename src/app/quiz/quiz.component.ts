@@ -356,7 +356,7 @@ export class QuizComponent implements OnInit {
     if (!this.currentQuestion) return '';
     
     const correctLetters = this.currentQuestion.correctAnswer.split('');
-    const answerTexts = correctLetters.map(letter => {
+    const answerTexts = correctLetters.map((letter: string) => {
       const optionKey = `option${letter}` as keyof typeof this.currentQuestion;
       return `${letter}) ${this.currentQuestion[optionKey]}`;
     });
