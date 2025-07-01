@@ -1,16 +1,17 @@
-## AWS Amplify Angular.js Starter Template
+## Multi-Choice Quiz App
 
-This repository provides a starter template for creating applications using Angular.js and AWS Amplify, emphasizing easy setup for authentication, API, and database capabilities.
+A modern multi-choice question testing application built with Angular and AWS Amplify, featuring real-time data synchronization and cloud-based question storage.
 
 ## Overview
 
-This template equips you with a foundational Angular.js application integrated with AWS Amplify, streamlined for scalability and performance. It is ideal for developers looking to jumpstart their project with pre-configured AWS services like Cognito, AppSync, and DynamoDB.
+This application provides an interactive quiz experience where users can answer multiple-choice questions, track their scores, and see immediate feedback. Built on AWS Amplify for scalability and real-time updates.
 
 ## Features
 
-- **Authentication**: Setup with Amazon Cognito for secure user authentication.
-- **API**: Ready-to-use GraphQL endpoint with AWS AppSync.
-- **Database**: Real-time database powered by Amazon DynamoDB.
+- **Interactive Quiz Interface**: Clean, responsive design for taking quizzes
+- **Real-time Scoring**: Immediate feedback and score tracking
+- **Question Management**: Cloud-based question storage with AWS DynamoDB
+- **Sample Questions**: Built-in sample questions for testing
 
 ## Deploying to AWS
 
