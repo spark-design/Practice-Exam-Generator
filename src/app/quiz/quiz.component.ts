@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../../amplify/data/resource';
-import { addSampleQuestions } from './sample-questions';
+
 
 const client = generateClient<Schema>();
 
@@ -79,6 +79,22 @@ export class QuizComponent implements OnInit {
     
     if (this.currentQuestionIndex >= this.questions.length) {
       this.quizCompleted = true;
+    }
+  }
+
+  previousQuestion() {
+    if (this.currentQuestionIndex > 0) {
+      this.currentQuestionIndex--;
+      this.selectedAnswers.clear();
+      this.showResult = false;
+    }
+  }
+
+  goToQuestion(index: number) {
+    if (index >= 0 && index < this.questions.length) {
+      this.currentQuestionIndex = index;
+      this.selectedAnswers.clear();
+      this.showResult = false;
     }
   }
 
@@ -336,16 +352,29 @@ export class QuizComponent implements OnInit {
            [...this.selectedAnswers].every(answer => correctAnswers.has(answer));
   }
 
+  getCorrectAnswerText(): string {
+    if (!this.currentQuestion) return '';
+    
+    const correctLetters = this.currentQuestion.correctAnswer.split('');
+    const answerTexts = correctLetters.map(letter => {
+      const optionKey = `option${letter}` as keyof typeof this.currentQuestion;
+      return `${letter}) ${this.currentQuestion[optionKey]}`;
+    });
+    
+    return `The correct answer is: ${this.currentQuestion.correctAnswer} - ${answerTexts.join(' AND ')}`;
+  }
+
   get isMultiSelect() {
     return this.currentQuestion?.correctAnswer.length > 1;
+  }
+
+  get canGoPrevious() {
+    return this.currentQuestionIndex > 0;
   }
 
   isAnswerSelected(option: string): boolean {
     return this.selectedAnswers.has(option);
   }
 
-  async loadSampleQuestions() {
-    await addSampleQuestions();
-    this.loadQuestions();
-  }
+
 }

@@ -6,7 +6,7 @@
       <h2>Welcome to the Quiz!</h2>
       <div *ngIf="questions.length === 0">
         <p>No questions available.</p>
-        <button (click)="loadSampleQuestions()">Load Sample Questions</button>
+
         <button class="bulk-btn" (click)="showBulkImportForm()">Import Questions</button>
       </div>
       <div *ngIf="questions.length > 0">
@@ -24,6 +24,20 @@
 
   <div *ngIf="showQuiz && questions.length > 0 && !quizCompleted">
     <button class="back-btn" (click)="backToMain()">← Back to Main</button>
+    
+    <!-- Question Navigator -->
+    <div class="question-navigator">
+      <div class="nav-scroll">
+        <button 
+          *ngFor="let q of questions; let i = index"
+          class="nav-question"
+          [class.current]="i === currentQuestionIndex"
+          (click)="goToQuestion(i)">
+          {{i + 1}}
+        </button>
+      </div>
+    </div>
+    
     <div class="question-header">
       <h2>Question {{currentQuestionIndex + 1}} of {{questions.length}}</h2>
       <div class="score">Score: {{score}}/{{currentQuestionIndex}}</div>
@@ -84,21 +98,34 @@
         <div [class]="isCorrect ? 'correct' : 'incorrect'">
           {{isCorrect ? '✓ Correct!' : '✗ Incorrect'}}
         </div>
-        <p>The correct answer{{currentQuestion?.correctAnswer.length > 1 ? 's are' : ' is'}}: {{currentQuestion?.correctAnswer}}</p>
+        <div *ngIf="!isCorrect" class="correct-answer-display">
+          {{getCorrectAnswerText()}}
+        </div>
       </div>
 
       <div class="actions">
-        <button 
-          *ngIf="!showResult" 
-          [disabled]="selectedAnswers.size === 0"
-          (click)="submitAnswer()">
-          Submit Answer
-        </button>
-        <button 
-          *ngIf="showResult" 
-          (click)="nextQuestion()">
-          {{currentQuestionIndex + 1 < questions.length ? 'Next Question' : 'Finish Quiz'}}
-        </button>
+        <div class="nav-buttons">
+          <button 
+            *ngIf="canGoPrevious"
+            class="prev-btn"
+            (click)="previousQuestion()">
+            ← Previous
+          </button>
+        </div>
+        
+        <div class="main-actions">
+          <button 
+            *ngIf="!showResult" 
+            [disabled]="selectedAnswers.size === 0"
+            (click)="submitAnswer()">
+            Submit Answer
+          </button>
+          <button 
+            *ngIf="showResult" 
+            (click)="nextQuestion()">
+            {{currentQuestionIndex + 1 < questions.length ? 'Next Question' : 'Finish Quiz'}}
+          </button>
+        </div>
       </div>
     </div>
   </div>
