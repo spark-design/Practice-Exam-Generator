@@ -33,6 +33,9 @@ export class QuizComponent implements OnInit {
   };
   bulkQuestions = '';
   showBulkImport = false;
+  showManageQuestions = false;
+  selectedQuestions = new Set<string>();
+  expandedQuestions = new Set<string>();
 
   ngOnInit(): void {
     this.loadQuestions();
@@ -90,6 +93,9 @@ export class QuizComponent implements OnInit {
     this.showQuiz = false;
     this.showAddQuestion = false;
     this.showBulkImport = false;
+    this.showManageQuestions = false;
+    this.selectedQuestions.clear();
+    this.expandedQuestions.clear();
     this.restartQuiz();
   }
 
@@ -99,6 +105,10 @@ export class QuizComponent implements OnInit {
 
   showBulkImportForm() {
     this.showBulkImport = true;
+  }
+
+  showManageQuestionsForm() {
+    this.showManageQuestions = true;
   }
 
   async addQuestion() {
@@ -139,33 +149,41 @@ export class QuizComponent implements OnInit {
 
   parseBulkQuestions(text: string) {
     const questions = [];
-    const blocks = text.split(/\n\s*\n/).filter(block => block.trim());
+    const lines = text.split('\n').map(line => line.trim());
     
-    for (const block of blocks) {
-      const lines = block.split('\n').map(line => line.trim()).filter(line => line);
-      
-      if (lines.length < 6) continue;
-      
-      const answerLine = lines[lines.length - 1];
-      const correctAnswer = answerLine.match(/^[ABCD]$/)?.[0];
-      
-      if (!correctAnswer) continue;
-      
+    let i = 0;
+    while (i < lines.length) {
       const questionLines = [];
       const options = { A: '', B: '', C: '', D: '' };
-      let foundOptions = false;
       
-      for (const line of lines.slice(0, -1)) {
-        const optionMatch = line.match(/^([ABCD])\. (.+)$/);
-        if (optionMatch) {
-          foundOptions = true;
-          options[optionMatch[1] as 'A'|'B'|'C'|'D'] = optionMatch[2];
-        } else if (!foundOptions) {
-          questionLines.push(line);
+      // Read question text until we hit option A
+      while (i < lines.length && !lines[i].match(/^A\. /)) {
+        if (lines[i]) questionLines.push(lines[i]);
+        i++;
+      }
+      
+      // Read options A, B, C, D
+      for (const optionLetter of ['A', 'B', 'C', 'D']) {
+        if (i < lines.length && lines[i].startsWith(`${optionLetter}. `)) {
+          options[optionLetter as 'A'|'B'|'C'|'D'] = lines[i].substring(3);
+          i++;
         }
       }
       
-      if (options.A && options.B && options.C && options.D) {
+      // Read correct answer
+      let correctAnswer = '';
+      if (i < lines.length && lines[i].match(/^[ABCD]$/)) {
+        correctAnswer = lines[i];
+        i++;
+      }
+      
+      // Skip empty lines
+      while (i < lines.length && !lines[i]) {
+        i++;
+      }
+      
+      // Add question if valid
+      if (questionLines.length > 0 && options.A && options.B && options.C && options.D && correctAnswer) {
         questions.push({
           question: questionLines.join(' '),
           optionA: options.A,
@@ -178,6 +196,44 @@ export class QuizComponent implements OnInit {
     }
     
     return questions;
+  }
+
+  toggleQuestionSelection(questionId: string) {
+    if (this.selectedQuestions.has(questionId)) {
+      this.selectedQuestions.delete(questionId);
+    } else {
+      this.selectedQuestions.add(questionId);
+    }
+  }
+
+  toggleQuestionExpansion(questionId: string) {
+    if (this.expandedQuestions.has(questionId)) {
+      this.expandedQuestions.delete(questionId);
+    } else {
+      this.expandedQuestions.add(questionId);
+    }
+  }
+
+  async deleteSelectedQuestions() {
+    if (this.selectedQuestions.size === 0) return;
+    
+    for (const questionId of this.selectedQuestions) {
+      try {
+        await client.models.Question.delete({ id: questionId });
+      } catch (error) {
+        console.error('Error deleting question:', error);
+      }
+    }
+    
+    this.selectedQuestions.clear();
+  }
+
+  isQuestionSelected(questionId: string): boolean {
+    return this.selectedQuestions.has(questionId);
+  }
+
+  isQuestionExpanded(questionId: string): boolean {
+    return this.expandedQuestions.has(questionId);
   }
 
   get currentQuestion() {

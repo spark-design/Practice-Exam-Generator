@@ -15,6 +15,7 @@
         <button class="start-btn" (click)="startQuiz()">Start Quiz</button>
         <button class="add-btn" (click)="showAddQuestionForm()">Add Single Question</button>
         <button class="bulk-btn" (click)="showBulkImportForm()">Import Multiple Questions</button>
+        <button class="manage-btn" (click)="showManageQuestionsForm()">Manage Questions</button>
       </div>
     </div>
   </div>
@@ -145,5 +146,50 @@
         <button type="button" (click)="backToMain()">Cancel</button>
       </div>
     </form>
+  </div>
+
+  <div *ngIf="showManageQuestions" class="manage-questions">
+    <h2>Manage Questions</h2>
+    <div class="manage-header">
+      <span>{{questions.length}} questions total</span>
+      <button 
+        *ngIf="selectedQuestions.size > 0" 
+        class="delete-btn" 
+        (click)="deleteSelectedQuestions()">
+        Delete Selected ({{selectedQuestions.size}})
+      </button>
+    </div>
+    
+    <div class="question-list">
+      <div *ngFor="let question of questions; let i = index" class="question-item">
+        <div class="question-header">
+          <button 
+            class="select-btn"
+            [class.selected]="isQuestionSelected(question.id)"
+            (click)="toggleQuestionSelection(question.id)">
+            {{isQuestionSelected(question.id) ? '☑' : '☐'}}
+          </button>
+          <span class="question-number">Question {{i + 1}}</span>
+          <button 
+            class="expand-btn"
+            (click)="toggleQuestionExpansion(question.id)">
+            {{isQuestionExpanded(question.id) ? '▼' : '▶'}}
+          </button>
+        </div>
+        
+        <div *ngIf="isQuestionExpanded(question.id)" class="question-details">
+          <div class="question-text">{{question.question}}</div>
+          <div class="options">
+            <div>A) {{question.optionA}}</div>
+            <div>B) {{question.optionB}}</div>
+            <div>C) {{question.optionC}}</div>
+            <div>D) {{question.optionD}}</div>
+          </div>
+          <div class="correct-answer">Correct Answer: {{question.correctAnswer}}</div>
+        </div>
+      </div>
+    </div>
+    
+    <button class="back-btn" (click)="backToMain()">Back to Main</button>
   </div>
 </main>
