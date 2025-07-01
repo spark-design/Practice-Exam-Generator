@@ -7,15 +7,17 @@
       <div *ngIf="questions.length === 0">
         <p>No questions available.</p>
         <button (click)="loadSampleQuestions()">Load Sample Questions</button>
-        <button class="add-btn" (click)="showAddQuestionForm()">Add Single Question</button>
-        <button class="bulk-btn" (click)="showBulkImportForm()">Import Multiple Questions</button>
+        <button class="bulk-btn" (click)="showBulkImportForm()">Import Questions</button>
       </div>
       <div *ngIf="questions.length > 0">
         <p>Ready to test your knowledge? This quiz has {{questions.length}} questions.</p>
-        <button class="start-btn" (click)="startQuiz()">Start Quiz</button>
-        <button class="add-btn" (click)="showAddQuestionForm()">Add Single Question</button>
-        <button class="bulk-btn" (click)="showBulkImportForm()">Import Multiple Questions</button>
-        <button class="manage-btn" (click)="showManageQuestionsForm()">Manage Questions</button>
+        <div class="button-group">
+          <button class="start-btn" (click)="startQuiz()">Start Quiz</button>
+          <div class="secondary-buttons">
+            <button class="bulk-btn" (click)="showBulkImportForm()">Import Questions</button>
+            <button class="manage-btn" (click)="showManageQuestionsForm()">Manage Questions</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -31,28 +33,33 @@
       <h3>{{currentQuestion?.question}}</h3>
       
       <div class="options" *ngIf="!showResult">
+        <div *ngIf="isMultiSelect" class="multi-select-hint">Select all correct answers:</div>
         <button 
           class="option-btn"
-          [class.selected]="selectedAnswer === 'A'"
+          [class.selected]="isAnswerSelected('A')"
           (click)="selectAnswer('A')">
+          <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('A') ? '☑' : '☐') : ''}}</span>
           A) {{currentQuestion?.optionA}}
         </button>
         <button 
           class="option-btn"
-          [class.selected]="selectedAnswer === 'B'"
+          [class.selected]="isAnswerSelected('B')"
           (click)="selectAnswer('B')">
+          <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('B') ? '☑' : '☐') : ''}}</span>
           B) {{currentQuestion?.optionB}}
         </button>
         <button 
           class="option-btn"
-          [class.selected]="selectedAnswer === 'C'"
+          [class.selected]="isAnswerSelected('C')"
           (click)="selectAnswer('C')">
+          <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('C') ? '☑' : '☐') : ''}}</span>
           C) {{currentQuestion?.optionC}}
         </button>
         <button 
           class="option-btn"
-          [class.selected]="selectedAnswer === 'D'"
+          [class.selected]="isAnswerSelected('D')"
           (click)="selectAnswer('D')">
+          <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('D') ? '☑' : '☐') : ''}}</span>
           D) {{currentQuestion?.optionD}}
         </button>
       </div>
@@ -61,18 +68,13 @@
         <div [class]="isCorrect ? 'correct' : 'incorrect'">
           {{isCorrect ? '✓ Correct!' : '✗ Incorrect'}}
         </div>
-        <p>The correct answer is: {{currentQuestion?.correctAnswer}}) 
-          <span *ngIf="currentQuestion?.correctAnswer === 'A'">{{currentQuestion?.optionA}}</span>
-          <span *ngIf="currentQuestion?.correctAnswer === 'B'">{{currentQuestion?.optionB}}</span>
-          <span *ngIf="currentQuestion?.correctAnswer === 'C'">{{currentQuestion?.optionC}}</span>
-          <span *ngIf="currentQuestion?.correctAnswer === 'D'">{{currentQuestion?.optionD}}</span>
-        </p>
+        <p>The correct answer{{currentQuestion?.correctAnswer.length > 1 ? 's are' : ' is'}}: {{currentQuestion?.correctAnswer}}</p>
       </div>
 
       <div class="actions">
         <button 
           *ngIf="!showResult" 
-          [disabled]="!selectedAnswer"
+          [disabled]="selectedAnswers.size === 0"
           (click)="submitAnswer()">
           Submit Answer
         </button>
@@ -94,44 +96,7 @@
     <button (click)="restartQuiz()">Take Quiz Again</button>
     <button (click)="backToMain()">Back to Main</button>
   </div>
-  <div *ngIf="showAddQuestion" class="add-question-form">
-    <h2>Add New Question</h2>
-    <form (ngSubmit)="addQuestion()">
-      <div class="form-group">
-        <label>Question:</label>
-        <input type="text" [(ngModel)]="newQuestion.question" name="question" required>
-      </div>
-      <div class="form-group">
-        <label>Option A:</label>
-        <input type="text" [(ngModel)]="newQuestion.optionA" name="optionA" required>
-      </div>
-      <div class="form-group">
-        <label>Option B:</label>
-        <input type="text" [(ngModel)]="newQuestion.optionB" name="optionB" required>
-      </div>
-      <div class="form-group">
-        <label>Option C:</label>
-        <input type="text" [(ngModel)]="newQuestion.optionC" name="optionC" required>
-      </div>
-      <div class="form-group">
-        <label>Option D:</label>
-        <input type="text" [(ngModel)]="newQuestion.optionD" name="optionD" required>
-      </div>
-      <div class="form-group">
-        <label>Correct Answer:</label>
-        <select [(ngModel)]="newQuestion.correctAnswer" name="correctAnswer">
-          <option value="A">A</option>
-          <option value="B">B</option>
-          <option value="C">C</option>
-          <option value="D">D</option>
-        </select>
-      </div>
-      <div class="form-actions">
-        <button type="submit" [disabled]="!newQuestion.question.trim()">Add Question</button>
-        <button type="button" (click)="backToMain()">Cancel</button>
-      </div>
-    </form>
-  </div>
+
 
   <div *ngIf="showBulkImport" class="bulk-import-form">
     <h2>Import Multiple Questions</h2>
@@ -151,7 +116,14 @@
   <div *ngIf="showManageQuestions" class="manage-questions">
     <h2>Manage Questions</h2>
     <div class="manage-header">
-      <span>{{questions.length}} questions total</span>
+      <div class="header-left">
+        <span>{{questions.length}} questions total</span>
+        <button 
+          class="select-all-btn"
+          (click)="selectAllQuestions()">
+          {{allQuestionsSelected ? 'Deselect All' : 'Select All'}}
+        </button>
+      </div>
       <button 
         *ngIf="selectedQuestions.size > 0" 
         class="delete-btn" 

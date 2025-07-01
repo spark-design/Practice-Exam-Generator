@@ -17,20 +17,12 @@ const client = generateClient<Schema>();
 export class QuizComponent implements OnInit {
   questions: any[] = [];
   currentQuestionIndex = 0;
-  selectedAnswer = '';
+  selectedAnswers = new Set<string>();
   score = 0;
   showResult = false;
   quizCompleted = false;
   showQuiz = false;
-  showAddQuestion = false;
-  newQuestion = {
-    question: '',
-    optionA: '',
-    optionB: '',
-    optionC: '',
-    optionD: '',
-    correctAnswer: 'A'
-  };
+
   bulkQuestions = '';
   showBulkImport = false;
   showManageQuestions = false;
@@ -54,13 +46,26 @@ export class QuizComponent implements OnInit {
   }
 
   selectAnswer(option: string) {
-    this.selectedAnswer = option;
+    if (this.isMultiSelect) {
+      if (this.selectedAnswers.has(option)) {
+        this.selectedAnswers.delete(option);
+      } else {
+        this.selectedAnswers.add(option);
+      }
+    } else {
+      this.selectedAnswers.clear();
+      this.selectedAnswers.add(option);
+    }
   }
 
   submitAnswer() {
-    if (!this.selectedAnswer) return;
+    if (this.selectedAnswers.size === 0) return;
     
-    if (this.selectedAnswer === this.questions[this.currentQuestionIndex].correctAnswer) {
+    const correctAnswers = new Set(this.questions[this.currentQuestionIndex].correctAnswer.split(''));
+    const isCorrect = this.selectedAnswers.size === correctAnswers.size && 
+                     [...this.selectedAnswers].every(answer => correctAnswers.has(answer));
+    
+    if (isCorrect) {
       this.score++;
     }
     
@@ -69,7 +74,7 @@ export class QuizComponent implements OnInit {
 
   nextQuestion() {
     this.currentQuestionIndex++;
-    this.selectedAnswer = '';
+    this.selectedAnswers.clear();
     this.showResult = false;
     
     if (this.currentQuestionIndex >= this.questions.length) {
@@ -79,7 +84,7 @@ export class QuizComponent implements OnInit {
 
   restartQuiz() {
     this.currentQuestionIndex = 0;
-    this.selectedAnswer = '';
+    this.selectedAnswers.clear();
     this.score = 0;
     this.showResult = false;
     this.quizCompleted = false;
@@ -91,16 +96,11 @@ export class QuizComponent implements OnInit {
 
   backToMain() {
     this.showQuiz = false;
-    this.showAddQuestion = false;
     this.showBulkImport = false;
     this.showManageQuestions = false;
     this.selectedQuestions.clear();
     this.expandedQuestions.clear();
     this.restartQuiz();
-  }
-
-  showAddQuestionForm() {
-    this.showAddQuestion = true;
   }
 
   showBulkImportForm() {
@@ -111,37 +111,29 @@ export class QuizComponent implements OnInit {
     this.showManageQuestions = true;
   }
 
-  async addQuestion() {
-    if (!this.newQuestion.question.trim()) return;
-    
-    try {
-      await client.models.Question.create(this.newQuestion);
-      this.newQuestion = {
-        question: '',
-        optionA: '',
-        optionB: '',
-        optionC: '',
-        optionD: '',
-        correctAnswer: 'A'
-      };
-      this.showAddQuestion = false;
-    } catch (error) {
-      console.error('Error adding question:', error);
-    }
-  }
+
 
   async importBulkQuestions() {
     if (!this.bulkQuestions.trim()) return;
     
     const questions = this.parseBulkQuestions(this.bulkQuestions);
+    console.log(`Parsed ${questions.length} questions from input`);
+    
+    let successCount = 0;
+    let errorCount = 0;
     
     for (const question of questions) {
       try {
         await client.models.Question.create(question);
+        successCount++;
       } catch (error) {
         console.error('Error adding question:', error);
+        errorCount++;
       }
     }
+    
+    console.log(`Successfully added ${successCount} questions, ${errorCount} errors`);
+    alert(`Added ${successCount} questions successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`);
     
     this.bulkQuestions = '';
     this.showBulkImport = false;
@@ -150,8 +142,11 @@ export class QuizComponent implements OnInit {
   parseBulkQuestions(text: string) {
     const questions = [];
     const lines = text.split('\n').map(line => line.trim());
+    console.log(`Processing ${lines.length} lines of input`);
     
     let i = 0;
+    let questionCount = 0;
+    
     while (i < lines.length) {
       const questionLines = [];
       const options = { A: '', B: '', C: '', D: '' };
@@ -167,14 +162,19 @@ export class QuizComponent implements OnInit {
         if (i < lines.length && lines[i].startsWith(`${optionLetter}. `)) {
           options[optionLetter as 'A'|'B'|'C'|'D'] = lines[i].substring(3);
           i++;
+        } else {
+          console.warn(`Missing option ${optionLetter} at line ${i + 1}`);
+          break;
         }
       }
       
-      // Read correct answer
+      // Read correct answer (can be multiple letters like AC, BD, etc.)
       let correctAnswer = '';
-      if (i < lines.length && lines[i].match(/^[ABCD]$/)) {
+      if (i < lines.length && lines[i].match(/^[ABCD]+$/)) {
         correctAnswer = lines[i];
         i++;
+      } else {
+        console.warn(`Missing or invalid answer at line ${i + 1}: "${lines[i]}"`);
       }
       
       // Skip empty lines
@@ -192,9 +192,17 @@ export class QuizComponent implements OnInit {
           optionD: options.D,
           correctAnswer
         });
+        questionCount++;
+      } else {
+        console.warn(`Skipped invalid question ${questionCount + 1}:`, {
+          questionLines: questionLines.length,
+          options,
+          correctAnswer
+        });
       }
     }
     
+    console.log(`Successfully parsed ${questions.length} valid questions`);
     return questions;
   }
 
@@ -236,12 +244,34 @@ export class QuizComponent implements OnInit {
     return this.expandedQuestions.has(questionId);
   }
 
+  selectAllQuestions() {
+    if (this.selectedQuestions.size === this.questions.length) {
+      this.selectedQuestions.clear();
+    } else {
+      this.questions.forEach(q => this.selectedQuestions.add(q.id));
+    }
+  }
+
+  get allQuestionsSelected(): boolean {
+    return this.questions.length > 0 && this.selectedQuestions.size === this.questions.length;
+  }
+
   get currentQuestion() {
     return this.questions[this.currentQuestionIndex];
   }
 
   get isCorrect() {
-    return this.selectedAnswer === this.currentQuestion?.correctAnswer;
+    const correctAnswers = new Set(this.currentQuestion?.correctAnswer.split('') || []);
+    return this.selectedAnswers.size === correctAnswers.size && 
+           [...this.selectedAnswers].every(answer => correctAnswers.has(answer));
+  }
+
+  get isMultiSelect() {
+    return this.currentQuestion?.correctAnswer.length > 1;
+  }
+
+  isAnswerSelected(option: string): boolean {
+    return this.selectedAnswers.has(option);
   }
 
   async loadSampleQuestions() {
