@@ -154,7 +154,7 @@ export class QuizComponent implements OnInit {
       }
       
       const questionLines = [];
-      const options = { A: '', B: '', C: '', D: '' };
+      const options = { A: '', B: '', C: '', D: '', E: '', F: '' };
       
       // Read question text until we hit option A
       while (i < lines.length && !lines[i].match(/^A\. /)) {
@@ -162,11 +162,14 @@ export class QuizComponent implements OnInit {
         i++;
       }
       
-      // Read options A, B, C, D
-      for (const optionLetter of ['A', 'B', 'C', 'D']) {
+      // Read options A, B, C, D, E, F (some questions have up to 6 options)
+      for (const optionLetter of ['A', 'B', 'C', 'D', 'E', 'F']) {
         if (i < lines.length && lines[i].startsWith(`${optionLetter}. `)) {
-          options[optionLetter as 'A'|'B'|'C'|'D'] = lines[i].substring(3);
+          options[optionLetter as 'A'|'B'|'C'|'D'|'E'|'F'] = lines[i].substring(3);
           i++;
+        } else if (optionLetter === 'E' || optionLetter === 'F') {
+          // Options E and F are optional, don't warn if missing
+          break;
         } else {
           console.warn(`Missing option ${optionLetter} at line ${i + 1}`);
           break;
@@ -177,12 +180,12 @@ export class QuizComponent implements OnInit {
       let correctAnswer = '';
       if (i < lines.length) {
         const answerLine = lines[i].trim();
-        if (answerLine.match(/^[ABCD]+$/)) {
+        if (answerLine.match(/^[ABCDEF]+$/)) {
           correctAnswer = answerLine;
           console.log(`Found answer: "${correctAnswer}" (${correctAnswer.length > 1 ? 'multi-select' : 'single'})`);
           i++;
         } else {
-          console.warn(`Invalid answer format at line ${i + 1}: "${answerLine}" (expected format: A, B, C, D, AB, AC, etc.)`);
+          console.warn(`Invalid answer format at line ${i + 1}: "${answerLine}" (expected format: A, B, C, D, E, F, AB, AC, etc.)`);
         }
       } else {
         console.warn(`No answer found after options`);
@@ -193,20 +196,30 @@ export class QuizComponent implements OnInit {
         i++;
       }
       
-      // Add question if valid
+      // Add question if valid (E is optional)
       if (questionLines.length > 0 && options.A && options.B && options.C && options.D && correctAnswer) {
         // Remove the Q number from the first line to get clean question text
         const cleanQuestion = questionLines[0].replace(/^Q\d+\.\s*/, '') + 
                              (questionLines.length > 1 ? ' ' + questionLines.slice(1).join(' ') : '');
         
-        questions.push({
+        const questionData: any = {
           question: cleanQuestion,
           optionA: options.A,
           optionB: options.B,
           optionC: options.C,
           optionD: options.D,
           correctAnswer
-        });
+        };
+        
+        // Add optional options E and F if they exist
+        if (options.E) {
+          questionData.optionE = options.E;
+        }
+        if (options.F) {
+          questionData.optionF = options.F;
+        }
+        
+        questions.push(questionData);
         console.log(`Added question with answer: ${correctAnswer}`);
       } else {
         console.warn(`Skipped invalid question:`, {
@@ -215,6 +228,8 @@ export class QuizComponent implements OnInit {
           hasOptionB: !!options.B,
           hasOptionC: !!options.C,
           hasOptionD: !!options.D,
+          hasOptionE: !!options.E,
+          hasOptionF: !!options.F,
           hasCorrectAnswer: !!correctAnswer,
           correctAnswer: correctAnswer
         });

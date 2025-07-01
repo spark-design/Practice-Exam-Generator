@@ -62,6 +62,22 @@
           <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('D') ? '☑' : '☐') : ''}}</span>
           D) {{currentQuestion?.optionD}}
         </button>
+        <button 
+          *ngIf="currentQuestion?.optionE"
+          class="option-btn"
+          [class.selected]="isAnswerSelected('E')"
+          (click)="selectAnswer('E')">
+          <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('E') ? '☑' : '☐') : ''}}</span>
+          E) {{currentQuestion?.optionE}}
+        </button>
+        <button 
+          *ngIf="currentQuestion?.optionF"
+          class="option-btn"
+          [class.selected]="isAnswerSelected('F')"
+          (click)="selectAnswer('F')">
+          <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('F') ? '☑' : '☐') : ''}}</span>
+          F) {{currentQuestion?.optionF}}
+        </button>
       </div>
 
       <div class="result" *ngIf="showResult">
@@ -156,6 +172,8 @@
             <div>B) {{question.optionB}}</div>
             <div>C) {{question.optionC}}</div>
             <div>D) {{question.optionD}}</div>
+            <div *ngIf="question.optionE">E) {{question.optionE}}</div>
+            <div *ngIf="question.optionF">F) {{question.optionF}}</div>
           </div>
           <div class="correct-answer">Correct Answer: {{question.correctAnswer}}</div>
         </div>

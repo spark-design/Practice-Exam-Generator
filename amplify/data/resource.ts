@@ -8,6 +8,8 @@ const schema = a.schema({
       optionB: a.string().required(),
       optionC: a.string().required(),
       optionD: a.string().required(),
+      optionE: a.string(),
+      optionF: a.string(),
       correctAnswer: a.string().required(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
