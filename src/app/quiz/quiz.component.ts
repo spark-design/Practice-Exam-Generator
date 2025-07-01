@@ -145,6 +145,7 @@ export class QuizComponent implements OnInit {
     console.log(`Processing ${lines.length} lines of input`);
     
     let i = 0;
+    let questionNumber = 0;
     
     while (i < lines.length) {
       // Look for question start (Q followed by number and dot)
@@ -153,51 +154,87 @@ export class QuizComponent implements OnInit {
         continue;
       }
       
+      questionNumber++;
+      const startLine = i;
+      console.log(`\n=== Processing Question ${questionNumber} starting at line ${i + 1}: ${lines[i].substring(0, 50)}... ===`);
+      
       const questionLines = [];
       const options = { A: '', B: '', C: '', D: '', E: '', F: '' };
       
       // Read question text until we hit option A
       while (i < lines.length && !lines[i].match(/^A\. /)) {
-        if (lines[i]) questionLines.push(lines[i]);
+        if (lines[i]) {
+          questionLines.push(lines[i]);
+          console.log(`  Question line ${i + 1}: ${lines[i].substring(0, 80)}...`);
+        }
         i++;
       }
+      console.log(`  Found ${questionLines.length} question lines, now at line ${i + 1}`);
       
       // Read options A, B, C, D, E, F (some questions have up to 6 options)
       for (const optionLetter of ['A', 'B', 'C', 'D', 'E', 'F']) {
         if (i < lines.length && lines[i].startsWith(`${optionLetter}. `)) {
-          options[optionLetter as 'A'|'B'|'C'|'D'|'E'|'F'] = lines[i].substring(3);
+          // Clean option text by removing extra annotations like "Most Voted", "Show Suggested Answer"
+          let optionText = lines[i].substring(3);
+          optionText = optionText.replace(/\s+(Most Voted|Show Suggested Answer)\s*$/i, '').trim();
+          options[optionLetter as 'A'|'B'|'C'|'D'|'E'|'F'] = optionText;
+          console.log(`  Option ${optionLetter} at line ${i + 1}: ${optionText.substring(0, 50)}...`);
           i++;
         } else if (optionLetter === 'E' || optionLetter === 'F') {
           // Options E and F are optional, don't warn if missing
+          console.log(`  Optional option ${optionLetter} not found, stopping option search`);
           break;
         } else {
-          console.warn(`Missing option ${optionLetter} at line ${i + 1}`);
+          console.warn(`  Missing required option ${optionLetter} at line ${i + 1}: "${lines[i]}"`);
           break;
         }
       }
+      console.log(`  Finished reading options, now at line ${i + 1}`);
       
       // Read correct answer (can be multiple letters like AC, BD, etc.)
       let correctAnswer = '';
-      if (i < lines.length) {
-        const answerLine = lines[i].trim();
-        if (answerLine.match(/^[ABCDEF]+$/)) {
-          correctAnswer = answerLine;
-          console.log(`Found answer: "${correctAnswer}" (${correctAnswer.length > 1 ? 'multi-select' : 'single'})`);
-          i++;
-        } else {
-          console.warn(`Invalid answer format at line ${i + 1}: "${answerLine}" (expected format: A, B, C, D, E, F, AB, AC, etc.)`);
-        }
-      } else {
-        console.warn(`No answer found after options`);
-      }
       
-      // Skip empty lines
-      while (i < lines.length && !lines[i]) {
+      console.log(`  Looking for answer starting at line ${i + 1}`);
+      
+      // Skip any empty lines or lines with extra text
+      while (i < lines.length && (!lines[i] || lines[i].match(/^(Show Suggested Answer|Most Voted)\s*$/i))) {
+        console.log(`  Skipping line ${i + 1}: "${lines[i]}"`);
         i++;
       }
       
-      // Add question if valid (E is optional)
-      if (questionLines.length > 0 && options.A && options.B && options.C && options.D && correctAnswer) {
+      if (i < lines.length) {
+        const answerLine = lines[i].trim();
+        console.log(`  Checking potential answer line ${i + 1}: "${answerLine}"`);
+        
+        if (answerLine.match(/^[ABCDEF]+$/)) {
+          correctAnswer = answerLine;
+          console.log(`  ✅ Found valid answer: "${correctAnswer}" (${correctAnswer.length > 1 ? 'multi-select' : 'single'})`);
+          i++;
+        } else {
+          console.warn(`  ⚠️ Invalid answer format: "${answerLine}"`);
+          // Try to extract valid answer from the line if it contains other text
+          const match = answerLine.match(/^([ABCDEF]+)/); 
+          if (match) {
+            correctAnswer = match[1];
+            console.log(`  ✅ Extracted answer from mixed content: "${correctAnswer}"`);
+            i++;
+          } else {
+            console.error(`  ❌ Could not extract valid answer from: "${answerLine}"`);
+          }
+        }
+      } else {
+        console.error(`  ❌ No answer found after options (reached end of input)`);
+      }
+      
+      // Skip empty lines and any remaining annotation text
+      while (i < lines.length && (!lines[i] || lines[i].match(/^(Show Suggested Answer|Most Voted|\s*)$/i))) {
+        i++;
+      }
+      
+      // Add question if valid (E and F are optional)
+      const isValid = questionLines.length > 0 && options.A && options.B && options.C && options.D && correctAnswer;
+      
+      if (isValid) {
         // Remove the Q number from the first line to get clean question text
         const cleanQuestion = questionLines[0].replace(/^Q\d+\.\s*/, '') + 
                              (questionLines.length > 1 ? ' ' + questionLines.slice(1).join(' ') : '');
@@ -220,19 +257,18 @@ export class QuizComponent implements OnInit {
         }
         
         questions.push(questionData);
-        console.log(`Added question with answer: ${correctAnswer}`);
+        console.log(`✅ Successfully added Question ${questionNumber} with answer: ${correctAnswer}`);
       } else {
-        console.warn(`Skipped invalid question:`, {
-          hasQuestionText: questionLines.length > 0,
-          hasOptionA: !!options.A,
-          hasOptionB: !!options.B,
-          hasOptionC: !!options.C,
-          hasOptionD: !!options.D,
-          hasOptionE: !!options.E,
-          hasOptionF: !!options.F,
-          hasCorrectAnswer: !!correctAnswer,
-          correctAnswer: correctAnswer
-        });
+        console.error(`❌ SKIPPED Question ${questionNumber} (lines ${startLine + 1}-${i}):`);
+        console.error(`  - Question text: ${questionLines.length > 0 ? 'YES' : 'NO'} (${questionLines.length} lines)`);
+        console.error(`  - Option A: ${options.A ? 'YES' : 'NO'} - "${options.A}"`);
+        console.error(`  - Option B: ${options.B ? 'YES' : 'NO'} - "${options.B}"`);
+        console.error(`  - Option C: ${options.C ? 'YES' : 'NO'} - "${options.C}"`);
+        console.error(`  - Option D: ${options.D ? 'YES' : 'NO'} - "${options.D}"`);
+        console.error(`  - Option E: ${options.E ? 'YES' : 'NO'} - "${options.E}"`);
+        console.error(`  - Option F: ${options.F ? 'YES' : 'NO'} - "${options.F}"`);
+        console.error(`  - Answer: ${correctAnswer ? 'YES' : 'NO'} - "${correctAnswer}"`);
+        console.error(`  - Raw question lines:`, questionLines);
       }
     }
     
