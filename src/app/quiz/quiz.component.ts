@@ -31,6 +31,8 @@ export class QuizComponent implements OnInit {
     optionD: '',
     correctAnswer: 'A'
   };
+  bulkQuestions = '';
+  showBulkImport = false;
 
   ngOnInit(): void {
     this.loadQuestions();
@@ -87,11 +89,16 @@ export class QuizComponent implements OnInit {
   backToMain() {
     this.showQuiz = false;
     this.showAddQuestion = false;
+    this.showBulkImport = false;
     this.restartQuiz();
   }
 
   showAddQuestionForm() {
     this.showAddQuestion = true;
+  }
+
+  showBulkImportForm() {
+    this.showBulkImport = true;
   }
 
   async addQuestion() {
@@ -111,6 +118,66 @@ export class QuizComponent implements OnInit {
     } catch (error) {
       console.error('Error adding question:', error);
     }
+  }
+
+  async importBulkQuestions() {
+    if (!this.bulkQuestions.trim()) return;
+    
+    const questions = this.parseBulkQuestions(this.bulkQuestions);
+    
+    for (const question of questions) {
+      try {
+        await client.models.Question.create(question);
+      } catch (error) {
+        console.error('Error adding question:', error);
+      }
+    }
+    
+    this.bulkQuestions = '';
+    this.showBulkImport = false;
+  }
+
+  parseBulkQuestions(text: string) {
+    const questions = [];
+    const blocks = text.split(/\n\s*\n/).filter(block => block.trim());
+    
+    for (const block of blocks) {
+      const lines = block.split('\n').map(line => line.trim()).filter(line => line);
+      
+      if (lines.length < 6) continue;
+      
+      const answerLine = lines[lines.length - 1];
+      const correctAnswer = answerLine.match(/^[ABCD]$/)?.[0];
+      
+      if (!correctAnswer) continue;
+      
+      const questionLines = [];
+      const options = { A: '', B: '', C: '', D: '' };
+      let foundOptions = false;
+      
+      for (const line of lines.slice(0, -1)) {
+        const optionMatch = line.match(/^([ABCD])\. (.+)$/);
+        if (optionMatch) {
+          foundOptions = true;
+          options[optionMatch[1] as 'A'|'B'|'C'|'D'] = optionMatch[2];
+        } else if (!foundOptions) {
+          questionLines.push(line);
+        }
+      }
+      
+      if (options.A && options.B && options.C && options.D) {
+        questions.push({
+          question: questionLines.join(' '),
+          optionA: options.A,
+          optionB: options.B,
+          optionC: options.C,
+          optionD: options.D,
+          correctAnswer
+        });
+      }
+    }
+    
+    return questions;
   }
 
   get currentQuestion() {

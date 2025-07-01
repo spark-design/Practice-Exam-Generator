@@ -51,6 +51,17 @@ main {
   background: #f0f8ff;
 }
 
+.option-btn {
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  color: black;
+}
+
 .option-btn.selected {
   border-color: #007bff;
   background: #007bff;
@@ -203,4 +214,35 @@ main {
 
 .form-actions button {
   margin-right: 10px;
+}
+
+.bulk-btn {
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.bulk-btn:hover {
+  background: #218838;
+}
+
+.bulk-import-form {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.bulk-import-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
 }

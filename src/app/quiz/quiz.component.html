@@ -7,12 +7,14 @@
       <div *ngIf="questions.length === 0">
         <p>No questions available.</p>
         <button (click)="loadSampleQuestions()">Load Sample Questions</button>
-        <button class="add-btn" (click)="showAddQuestionForm()">Add Your Own Question</button>
+        <button class="add-btn" (click)="showAddQuestionForm()">Add Single Question</button>
+        <button class="bulk-btn" (click)="showBulkImportForm()">Import Multiple Questions</button>
       </div>
       <div *ngIf="questions.length > 0">
         <p>Ready to test your knowledge? This quiz has {{questions.length}} questions.</p>
         <button class="start-btn" (click)="startQuiz()">Start Quiz</button>
-        <button class="add-btn" (click)="showAddQuestionForm()">Add Your Own Question</button>
+        <button class="add-btn" (click)="showAddQuestionForm()">Add Single Question</button>
+        <button class="bulk-btn" (click)="showBulkImportForm()">Import Multiple Questions</button>
       </div>
     </div>
   </div>
@@ -125,6 +127,21 @@
       </div>
       <div class="form-actions">
         <button type="submit" [disabled]="!newQuestion.question.trim()">Add Question</button>
+        <button type="button" (click)="backToMain()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="showBulkImport" class="bulk-import-form">
+    <h2>Import Multiple Questions</h2>
+    <p>Paste your questions in the format: Question text, followed by A. B. C. D. options, then the correct letter on a new line.</p>
+    <form (ngSubmit)="importBulkQuestions()">
+      <div class="form-group">
+        <label>Questions (paste your formatted text):</label>
+        <textarea [(ngModel)]="bulkQuestions" name="bulkQuestions" rows="15" placeholder="Paste your questions here..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" [disabled]="!bulkQuestions.trim()">Import Questions</button>
         <button type="button" (click)="backToMain()">Cancel</button>
       </div>
     </form>
