@@ -145,9 +145,14 @@ export class QuizComponent implements OnInit {
     console.log(`Processing ${lines.length} lines of input`);
     
     let i = 0;
-    let questionCount = 0;
     
     while (i < lines.length) {
+      // Look for question start (Q followed by number and dot)
+      if (!lines[i] || !lines[i].match(/^Q\d+\./)) {
+        i++;
+        continue;
+      }
+      
       const questionLines = [];
       const options = { A: '', B: '', C: '', D: '' };
       
@@ -184,17 +189,20 @@ export class QuizComponent implements OnInit {
       
       // Add question if valid
       if (questionLines.length > 0 && options.A && options.B && options.C && options.D && correctAnswer) {
+        // Remove the Q number from the first line to get clean question text
+        const cleanQuestion = questionLines[0].replace(/^Q\d+\.\s*/, '') + 
+                             (questionLines.length > 1 ? ' ' + questionLines.slice(1).join(' ') : '');
+        
         questions.push({
-          question: questionLines.join(' '),
+          question: cleanQuestion,
           optionA: options.A,
           optionB: options.B,
           optionC: options.C,
           optionD: options.D,
           correctAnswer
         });
-        questionCount++;
       } else {
-        console.warn(`Skipped invalid question ${questionCount + 1}:`, {
+        console.warn(`Skipped invalid question:`, {
           questionLines: questionLines.length,
           options,
           correctAnswer
