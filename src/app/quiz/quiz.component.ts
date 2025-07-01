@@ -19,6 +19,7 @@ export class QuizComponent implements OnInit {
   currentQuestionIndex = 0;
   selectedAnswers = new Set<string>();
   score = 0;
+  answeredCount = 0;
   showResult = false;
   quizCompleted = false;
   showQuiz = false;
@@ -69,6 +70,7 @@ export class QuizComponent implements OnInit {
       this.score++;
     }
     
+    this.answeredCount++;
     this.showResult = true;
   }
 
@@ -102,6 +104,7 @@ export class QuizComponent implements OnInit {
     this.currentQuestionIndex = 0;
     this.selectedAnswers.clear();
     this.score = 0;
+    this.answeredCount = 0;
     this.showResult = false;
     this.quizCompleted = false;
   }
