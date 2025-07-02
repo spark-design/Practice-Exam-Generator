@@ -135,3 +135,8 @@ main{max-width:800px;margin:0 auto;padding:20px;font-family:Arial,sans-serif}
   font-weight: bold;
   color: #856404;
 }
+.original-number {
+  font-size: 0.8em;
+  color: #666;
+  font-weight: normal;
+}

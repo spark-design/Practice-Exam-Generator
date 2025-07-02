@@ -16,6 +16,7 @@ const client = generateClient<Schema>();
 })
 export class QuizComponent implements OnInit {
   questions: any[] = [];
+  randomizedQuestions: any[] = [];
   currentQuestionIndex = 0;
   selectedAnswers = new Set<string>();
   score = 0;
@@ -62,7 +63,7 @@ export class QuizComponent implements OnInit {
   submitAnswer() {
     if (this.selectedAnswers.size === 0) return;
     
-    const correctAnswers = new Set(this.questions[this.currentQuestionIndex].correctAnswer.split(''));
+    const correctAnswers = new Set(this.randomizedQuestions[this.currentQuestionIndex].correctAnswer.split(''));
     const isCorrect = this.selectedAnswers.size === correctAnswers.size && 
                      [...this.selectedAnswers].every(answer => correctAnswers.has(answer));
     
@@ -79,7 +80,7 @@ export class QuizComponent implements OnInit {
     this.selectedAnswers.clear();
     this.showResult = false;
     
-    if (this.currentQuestionIndex >= this.questions.length) {
+    if (this.currentQuestionIndex >= this.randomizedQuestions.length) {
       this.quizCompleted = true;
     }
   }
@@ -93,7 +94,7 @@ export class QuizComponent implements OnInit {
   }
 
   goToQuestion(index: number) {
-    if (index >= 0 && index < this.questions.length) {
+    if (index >= 0 && index < this.randomizedQuestions.length) {
       this.currentQuestionIndex = index;
       this.selectedAnswers.clear();
       this.showResult = false;
@@ -110,7 +111,19 @@ export class QuizComponent implements OnInit {
   }
 
   startQuiz() {
+    this.randomizeQuestions();
     this.showQuiz = true;
+  }
+
+  randomizeQuestions() {
+    // Add original index to each question
+    const questionsWithIndex = this.questions.map((q, index) => ({
+      ...q,
+      originalNumber: index + 1
+    }));
+    
+    // Shuffle the array
+    this.randomizedQuestions = [...questionsWithIndex].sort(() => Math.random() - 0.5);
   }
 
   backToMain() {
@@ -346,7 +359,7 @@ export class QuizComponent implements OnInit {
   }
 
   get currentQuestion() {
-    return this.questions[this.currentQuestionIndex];
+    return this.randomizedQuestions[this.currentQuestionIndex];
   }
 
   get isCorrect() {
