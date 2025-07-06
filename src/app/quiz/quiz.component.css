@@ -191,6 +191,18 @@ main{max-width:800px;margin:0 auto;padding:20px;font-family:Arial,sans-serif}
   color: #0056b3;
   line-height: 1.5;
 }
+
+.loading-text .dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+}
 .original-number {
   font-size: 0.8em;
   color: #666;

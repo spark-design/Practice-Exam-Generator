@@ -121,7 +121,8 @@
           class="ai-explain-btn"
           [disabled]="loadingExplanation"
           (click)="getAIExplanation()">
-          {{loadingExplanation ? 'Loading...' : '🤖 AI Explain'}}
+          <span *ngIf="!loadingExplanation">🤖 AI Explain</span>
+          <span *ngIf="loadingExplanation" class="loading-text">Loading<span class="dots"></span></span>
         </button>
         <div *ngIf="getExplanation()" class="ai-explanation">
           {{getExplanation()}}
