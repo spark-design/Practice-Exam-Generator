@@ -508,7 +508,16 @@ export class QuizComponent implements OnInit {
       });
       
       console.log('AI Response:', data);
-      this.explanations.set(this.currentQuestionIndex, data || 'Unable to generate explanation.');
+      
+      if (data) {
+        this.explanations.set(this.currentQuestionIndex, data);
+      } else {
+        // Fallback explanation when AI returns null
+        const fallback = this.isCorrect
+          ? `Correct! You chose ${question.correctAnswer}. This answer demonstrates understanding of the key concepts in the question.`
+          : `You selected ${userAnswer}, but the correct answer is ${question.correctAnswer}. The correct option addresses the specific requirements mentioned in the question better than your selection.`;
+        this.explanations.set(this.currentQuestionIndex, fallback);
+      }
     } catch (error) {
       console.error('Error getting AI explanation:', error);
       const fallback = this.isCorrect
