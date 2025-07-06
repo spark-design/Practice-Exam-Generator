@@ -47,7 +47,7 @@
     
     <div class="question-header">
       <h2>Question {{currentQuestionIndex + 1}} of {{randomizedQuestions.length}}</h2>
-      <div class="score">Score: {{score}}/{{answeredCount}}</div>
+      <div class="score">Score: {{score}}/{{answeredCount}} ({{answeredCount > 0 ? (score/answeredCount*100).toFixed(0) : 0}}%)</div>
     </div>
 
     <div class="question-card">

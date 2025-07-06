@@ -16,7 +16,7 @@ const schema = a.schema({
     
   explainAnswer: a.generation({
     aiModel: a.ai.model('Claude 3.5 Sonnet'),
-    systemPrompt: 'Answer in 1-2 complete sentences only. Explain why the correct answer is right and why wrong answers are wrong. No introductions.',
+    systemPrompt: 'Provide a clear explanation in 2-4 sentences. For multi-answer questions, explain what each correct option provides and why incorrect options are wrong. Be specific about the technical reasons.',
   })
   .arguments({
     question: a.string(),
