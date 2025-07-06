@@ -130,6 +130,27 @@ export class QuizComponent implements OnInit {
       this.loadQuestionState();
     }
   }
+  
+  startNewQuiz() {
+    if (confirm('Are you sure you want to start a new quiz? This will reset all your progress.')) {
+      this.currentQuestionIndex = 0;
+      this.selectedAnswers.clear();
+      this.score = 0;
+      this.answeredCount = 0;
+      this.showResult = false;
+      this.quizCompleted = false;
+      this.questionAnswers.clear();
+      this.questionResults.clear();
+      this.hasQuizInProgress = true;
+      this.explanations.clear();
+      this.loadingExplanation = false;
+      this.randomizeQuestions();
+      this.showQuiz = true;
+      this.showBulkImport = false;
+      this.showManageQuestions = false;
+      this.loadQuestionState();
+    }
+  }
 
   startQuiz() {
     if (!this.hasQuizInProgress) {
@@ -474,14 +495,25 @@ export class QuizComponent implements OnInit {
       const options = `A) ${question.optionA}, B) ${question.optionB}, C) ${question.optionC}, D) ${question.optionD}${question.optionE ? `, E) ${question.optionE}` : ''}${question.optionF ? `, F) ${question.optionF}` : ''}`;
       const userAnswer = Array.from(this.selectedAnswers).join('');
       
-      // For now, provide simple explanations until function is properly configured
-      const explanation = this.isCorrect
-        ? `Great job! You selected the correct answer (${question.correctAnswer}). This demonstrates your understanding of the concept.`
-        : `You selected ${userAnswer}, but the correct answer is ${question.correctAnswer}. Review the question and options to understand why ${question.correctAnswer} is the better choice.`;
+      const prompt = this.isCorrect 
+        ? `Given the question: "${question.question}" with options: ${options}. The right answer is ${question.correctAnswer}. Why is that?`
+        : `Given the question: "${question.question}" with options: ${options}. I answered ${userAnswer} but the correct answer was ${question.correctAnswer}. Why was my answer wrong and why is the correct answer right?`;
       
-      this.explanations.set(this.currentQuestionIndex, explanation);
+      const { data } = await client.generations.explainAnswer({
+        question: question.question,
+        options,
+        correctAnswer: question.correctAnswer,
+        userAnswer,
+        isCorrect: this.isCorrect
+      });
+      
+      this.explanations.set(this.currentQuestionIndex, data || 'Unable to generate explanation.');
     } catch (error) {
       console.error('Error getting AI explanation:', error);
+      const fallback = this.isCorrect
+        ? `The correct answer is ${this.currentQuestion.correctAnswer}.`
+        : `You selected ${Array.from(this.selectedAnswers).join('')}, but ${this.currentQuestion.correctAnswer} is correct.`;
+      this.explanations.set(this.currentQuestionIndex, fallback);
     } finally {
       this.loadingExplanation = false;
     }

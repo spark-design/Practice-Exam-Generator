@@ -13,6 +13,20 @@ const schema = a.schema({
       correctAnswer: a.string().required(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
+    
+  explainAnswer: a.generation({
+    aiModel: a.ai.model('Claude 3.5 Haiku'),
+    systemPrompt: 'You are a helpful tutor that explains quiz answers clearly and concisely.',
+  })
+  .arguments({
+    question: a.string(),
+    options: a.string(),
+    correctAnswer: a.string(),
+    userAnswer: a.string(),
+    isCorrect: a.boolean(),
+  })
+  .returns(a.string())
+  .authorization((allow) => allow.publicApiKey()),
 });
 
 export type Schema = ClientSchema<typeof schema>;

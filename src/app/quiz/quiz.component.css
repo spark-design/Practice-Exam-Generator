@@ -196,3 +196,9 @@ main{max-width:800px;margin:0 auto;padding:20px;font-family:Arial,sans-serif}
   color: #666;
   font-weight: normal;
 }
+
+.quiz-header-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}

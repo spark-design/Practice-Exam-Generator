@@ -14,7 +14,7 @@
         <p *ngIf="hasQuizInProgress">You have a quiz in progress. Question {{currentQuestionIndex + 1}} of {{randomizedQuestions.length}}. Score: {{score}}/{{answeredCount}}</p>
         <div class="button-group">
           <button class="start-btn" (click)="startQuiz()">{{hasQuizInProgress ? 'Resume Quiz' : 'Start Quiz'}}</button>
-          <button *ngIf="hasQuizInProgress" class="restart-btn" (click)="restartQuiz()">Start New Quiz</button>
+          <button *ngIf="hasQuizInProgress" class="restart-btn" (click)="startNewQuiz()">Start New Quiz</button>
           <div class="secondary-buttons">
             <button class="bulk-btn" (click)="showBulkImportForm()">Import Questions</button>
             <button class="manage-btn" (click)="showManageQuestionsForm()">Manage Questions</button>
@@ -25,7 +25,10 @@
   </div>
 
   <div *ngIf="showQuiz && questions.length > 0 && !quizCompleted">
-    <button class="back-btn" (click)="backToMain()">← Back to Main</button>
+    <div class="quiz-header-buttons">
+      <button class="back-btn" (click)="backToMain()">← Back to Main</button>
+      <button class="restart-btn" (click)="restartQuiz()">🔄 Restart Quiz</button>
+    </div>
     
     <!-- Question Navigator -->
     <div class="question-navigator">
@@ -133,7 +136,6 @@
             (click)="previousQuestion()">
             ← Previous
           </button>
-          <button class="restart-btn" (click)="restartQuiz()">Restart Quiz</button>
         </div>
         
         <div class="main-actions">
