@@ -507,6 +507,7 @@ export class QuizComponent implements OnInit {
         isCorrect: this.isCorrect
       });
       
+      console.log('AI Response:', data);
       this.explanations.set(this.currentQuestionIndex, data || 'Unable to generate explanation.');
     } catch (error) {
       console.error('Error getting AI explanation:', error);
