@@ -114,19 +114,21 @@ export class QuizComponent implements OnInit {
   }
 
   restartQuiz() {
-    this.currentQuestionIndex = 0;
-    this.selectedAnswers.clear();
-    this.score = 0;
-    this.answeredCount = 0;
-    this.showResult = false;
-    this.quizCompleted = false;
-    this.questionAnswers.clear();
-    this.questionResults.clear();
-    this.hasQuizInProgress = false;
-    this.explanations.clear();
-    this.loadingExplanation = false;
-    this.randomizeQuestions();
-    this.loadQuestionState();
+    if (confirm('Are you sure you want to restart the quiz? This will reset all your progress.')) {
+      this.currentQuestionIndex = 0;
+      this.selectedAnswers.clear();
+      this.score = 0;
+      this.answeredCount = 0;
+      this.showResult = false;
+      this.quizCompleted = false;
+      this.questionAnswers.clear();
+      this.questionResults.clear();
+      this.hasQuizInProgress = false;
+      this.explanations.clear();
+      this.loadingExplanation = false;
+      this.randomizeQuestions();
+      this.loadQuestionState();
+    }
   }
 
   startQuiz() {

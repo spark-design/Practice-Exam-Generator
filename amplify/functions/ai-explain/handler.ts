@@ -1,47 +1,20 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
-
-const client = new BedrockRuntimeClient({ region: "us-east-1" });
-
 export const handler = async (event: any) => {
   try {
-    const { question, options, correctAnswer, userAnswer, isCorrect } = JSON.parse(event.body);
+    const { question, options, correctAnswer, userAnswer, isCorrect } = event;
     
     const prompt = isCorrect 
       ? `Explain why the correct answer "${correctAnswer}" is right for this question: "${question}". Options: ${options}`
       : `Explain why "${userAnswer}" is wrong and why "${correctAnswer}" is the correct answer for this question: "${question}". Options: ${options}`;
 
-    const input = {
-      modelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
-      contentType: "application/json",
-      accept: "application/json",
-      body: JSON.stringify({
-        anthropic_version: "bedrock-2023-05-31",
-        max_tokens: 300,
-        messages: [{
-          role: "user",
-          content: prompt
-        }]
-      })
-    };
-
-    const command = new InvokeModelCommand(input);
-    const response = await client.send(command);
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    // For now, return a simple explanation until Bedrock is properly configured
+    const explanation = isCorrect
+      ? `Great job! You selected the correct answer (${correctAnswer}). This demonstrates your understanding of the concept.`
+      : `You selected ${userAnswer}, but the correct answer is ${correctAnswer}. Review the question and options to understand why ${correctAnswer} is the better choice.`;
     
     return {
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*"
-      },
-      body: JSON.stringify({
-        explanation: responseBody.content[0].text
-      })
+      explanation
     };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+  } catch (error: any) {
+    throw new Error(`AI explanation failed: ${error.message}`);
   }
 };
