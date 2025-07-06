@@ -125,7 +125,13 @@
           <span *ngIf="loadingExplanation" class="loading-text">Loading<span class="dots"></span></span>
         </button>
         <div *ngIf="getExplanation()" class="ai-explanation">
-          {{getExplanation()}}
+          <div class="explanation-text">{{getExplanation()}}</div>
+          <button 
+            class="retry-btn"
+            [disabled]="loadingExplanation"
+            (click)="retryAIExplanation()">
+            🔄 Try Again
+          </button>
         </div>
       </div>
 

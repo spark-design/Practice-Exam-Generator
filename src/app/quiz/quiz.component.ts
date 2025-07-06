@@ -532,6 +532,12 @@ export class QuizComponent implements OnInit {
   getExplanation(): string {
     return this.explanations.get(this.currentQuestionIndex) || '';
   }
+  
+  async retryAIExplanation() {
+    // Clear the current explanation and regenerate
+    this.explanations.delete(this.currentQuestionIndex);
+    await this.getAIExplanation();
+  }
 
 
 }
