@@ -15,7 +15,7 @@ const schema = a.schema({
     .authorization((allow) => [allow.publicApiKey()]),
     
   explainAnswer: a.generation({
-    aiModel: a.ai.model('Claude 3.5 Haiku'),
+    aiModel: a.ai.model('Claude 3.5 Sonnet'),
     systemPrompt: 'You are a helpful tutor that explains quiz answers clearly and concisely.',
   })
   .arguments({
