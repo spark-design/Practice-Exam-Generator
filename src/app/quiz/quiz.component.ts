@@ -474,15 +474,12 @@ export class QuizComponent implements OnInit {
       const options = `A) ${question.optionA}, B) ${question.optionB}, C) ${question.optionC}, D) ${question.optionD}${question.optionE ? `, E) ${question.optionE}` : ''}${question.optionF ? `, F) ${question.optionF}` : ''}`;
       const userAnswer = Array.from(this.selectedAnswers).join('');
       
-      const { data } = await client.functions.aiExplain({
-        question: question.question,
-        options,
-        correctAnswer: question.correctAnswer,
-        userAnswer,
-        isCorrect: this.isCorrect
-      });
+      // For now, provide simple explanations until function is properly configured
+      const explanation = this.isCorrect
+        ? `Great job! You selected the correct answer (${question.correctAnswer}). This demonstrates your understanding of the concept.`
+        : `You selected ${userAnswer}, but the correct answer is ${question.correctAnswer}. Review the question and options to understand why ${question.correctAnswer} is the better choice.`;
       
-      this.explanations.set(this.currentQuestionIndex, data.explanation);
+      this.explanations.set(this.currentQuestionIndex, explanation);
     } catch (error) {
       console.error('Error getting AI explanation:', error);
     } finally {
