@@ -24,6 +24,10 @@ export class QuizComponent implements OnInit {
   showResult = false;
   quizCompleted = false;
   showQuiz = false;
+  
+  // Track answers and results for each question
+  questionAnswers = new Map<number, Set<string>>();
+  questionResults = new Map<number, { isCorrect: boolean; submitted: boolean }>();
 
   bulkQuestions = '';
   showBulkImport = false;
@@ -67,6 +71,10 @@ export class QuizComponent implements OnInit {
     const isCorrect = this.selectedAnswers.size === correctAnswers.size && 
                      [...this.selectedAnswers].every(answer => correctAnswers.has(answer));
     
+    // Store the answer and result for this question
+    this.questionAnswers.set(this.currentQuestionIndex, new Set(this.selectedAnswers));
+    this.questionResults.set(this.currentQuestionIndex, { isCorrect, submitted: true });
+    
     if (isCorrect) {
       this.score++;
     }
@@ -77,8 +85,7 @@ export class QuizComponent implements OnInit {
 
   nextQuestion() {
     this.currentQuestionIndex++;
-    this.selectedAnswers.clear();
-    this.showResult = false;
+    this.loadQuestionState();
     
     if (this.currentQuestionIndex >= this.randomizedQuestions.length) {
       this.quizCompleted = true;
@@ -88,16 +95,14 @@ export class QuizComponent implements OnInit {
   previousQuestion() {
     if (this.currentQuestionIndex > 0) {
       this.currentQuestionIndex--;
-      this.selectedAnswers.clear();
-      this.showResult = false;
+      this.loadQuestionState();
     }
   }
 
   goToQuestion(index: number) {
     if (index >= 0 && index < this.randomizedQuestions.length) {
       this.currentQuestionIndex = index;
-      this.selectedAnswers.clear();
-      this.showResult = false;
+      this.loadQuestionState();
     }
   }
 
@@ -108,11 +113,14 @@ export class QuizComponent implements OnInit {
     this.answeredCount = 0;
     this.showResult = false;
     this.quizCompleted = false;
+    this.questionAnswers.clear();
+    this.questionResults.clear();
   }
 
   startQuiz() {
     this.randomizeQuestions();
     this.showQuiz = true;
+    this.loadQuestionState();
   }
 
   randomizeQuestions() {
@@ -390,6 +398,47 @@ export class QuizComponent implements OnInit {
 
   isAnswerSelected(option: string): boolean {
     return this.selectedAnswers.has(option);
+  }
+  
+  loadQuestionState() {
+    // Load saved answers for current question
+    const savedAnswers = this.questionAnswers.get(this.currentQuestionIndex);
+    if (savedAnswers) {
+      this.selectedAnswers = new Set(savedAnswers);
+    } else {
+      this.selectedAnswers.clear();
+    }
+    
+    // Load result state
+    const result = this.questionResults.get(this.currentQuestionIndex);
+    this.showResult = result?.submitted || false;
+  }
+  
+  isQuestionAnswered(questionIndex: number): boolean {
+    return this.questionResults.has(questionIndex);
+  }
+  
+  isQuestionCorrect(questionIndex: number): boolean {
+    const result = this.questionResults.get(questionIndex);
+    return result?.isCorrect || false;
+  }
+  
+  getAnswerClass(option: string): string {
+    if (!this.showResult) return '';
+    
+    const correctAnswers = this.currentQuestion?.correctAnswer.split('') || [];
+    const isCorrectAnswer = correctAnswers.includes(option);
+    const isSelectedAnswer = this.selectedAnswers.has(option);
+    
+    if (isSelectedAnswer && isCorrectAnswer) {
+      return 'correct-selected';
+    } else if (isSelectedAnswer && !isCorrectAnswer) {
+      return 'incorrect-selected';
+    } else if (!isSelectedAnswer && isCorrectAnswer) {
+      return 'correct-unselected';
+    }
+    
+    return '';
   }
 
 

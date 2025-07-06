@@ -32,6 +32,8 @@
           *ngFor="let q of randomizedQuestions; let i = index"
           class="nav-question"
           [class.current]="i === currentQuestionIndex"
+          [class.answered]="isQuestionAnswered(i)"
+          [class.correct]="isQuestionCorrect(i)"
           (click)="goToQuestion(i)">
           {{i + 1}}
         </button>
@@ -46,11 +48,13 @@
     <div class="question-card">
       <h3>{{currentQuestion?.question}} <span class="original-number">(Original Q{{currentQuestion?.originalNumber}})</span></h3>
       
-      <div class="options" *ngIf="!showResult">
-        <div *ngIf="isMultiSelect" class="multi-select-hint">Select all correct answers:</div>
+      <div class="options">
+        <div *ngIf="isMultiSelect && !showResult" class="multi-select-hint">Select all correct answers:</div>
         <button 
           class="option-btn"
           [class.selected]="isAnswerSelected('A')"
+          [ngClass]="getAnswerClass('A')"
+          [disabled]="showResult"
           (click)="selectAnswer('A')">
           <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('A') ? '☑' : '☐') : ''}}</span>
           A) {{currentQuestion?.optionA}}
@@ -58,6 +62,8 @@
         <button 
           class="option-btn"
           [class.selected]="isAnswerSelected('B')"
+          [ngClass]="getAnswerClass('B')"
+          [disabled]="showResult"
           (click)="selectAnswer('B')">
           <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('B') ? '☑' : '☐') : ''}}</span>
           B) {{currentQuestion?.optionB}}
@@ -65,6 +71,8 @@
         <button 
           class="option-btn"
           [class.selected]="isAnswerSelected('C')"
+          [ngClass]="getAnswerClass('C')"
+          [disabled]="showResult"
           (click)="selectAnswer('C')">
           <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('C') ? '☑' : '☐') : ''}}</span>
           C) {{currentQuestion?.optionC}}
@@ -72,6 +80,8 @@
         <button 
           class="option-btn"
           [class.selected]="isAnswerSelected('D')"
+          [ngClass]="getAnswerClass('D')"
+          [disabled]="showResult"
           (click)="selectAnswer('D')">
           <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('D') ? '☑' : '☐') : ''}}</span>
           D) {{currentQuestion?.optionD}}
@@ -80,6 +90,8 @@
           *ngIf="currentQuestion?.optionE"
           class="option-btn"
           [class.selected]="isAnswerSelected('E')"
+          [ngClass]="getAnswerClass('E')"
+          [disabled]="showResult"
           (click)="selectAnswer('E')">
           <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('E') ? '☑' : '☐') : ''}}</span>
           E) {{currentQuestion?.optionE}}
@@ -88,6 +100,8 @@
           *ngIf="currentQuestion?.optionF"
           class="option-btn"
           [class.selected]="isAnswerSelected('F')"
+          [ngClass]="getAnswerClass('F')"
+          [disabled]="showResult"
           (click)="selectAnswer('F')">
           <span class="option-indicator">{{isMultiSelect ? (isAnswerSelected('F') ? '☑' : '☐') : ''}}</span>
           F) {{currentQuestion?.optionF}}
