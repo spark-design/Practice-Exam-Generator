@@ -10,9 +10,11 @@
         <button class="bulk-btn" (click)="showBulkImportForm()">Import Questions</button>
       </div>
       <div *ngIf="questions.length > 0">
-        <p>Ready to test your knowledge? This quiz has {{questions.length}} questions.</p>
+        <p *ngIf="!hasQuizInProgress">Ready to test your knowledge? This quiz has {{questions.length}} questions.</p>
+        <p *ngIf="hasQuizInProgress">You have a quiz in progress. Question {{currentQuestionIndex + 1}} of {{randomizedQuestions.length}}. Score: {{score}}/{{answeredCount}}</p>
         <div class="button-group">
-          <button class="start-btn" (click)="startQuiz()">Start Quiz</button>
+          <button class="start-btn" (click)="startQuiz()">{{hasQuizInProgress ? 'Resume Quiz' : 'Start Quiz'}}</button>
+          <button *ngIf="hasQuizInProgress" class="restart-btn" (click)="restartQuiz()">Start New Quiz</button>
           <div class="secondary-buttons">
             <button class="bulk-btn" (click)="showBulkImportForm()">Import Questions</button>
             <button class="manage-btn" (click)="showManageQuestionsForm()">Manage Questions</button>
@@ -112,9 +114,6 @@
         <div [class]="isCorrect ? 'correct' : 'incorrect'">
           {{isCorrect ? '✓ Correct!' : '✗ Incorrect'}}
         </div>
-        <div *ngIf="!isCorrect" class="correct-answer-display">
-          {{getCorrectAnswerText()}}
-        </div>
       </div>
 
       <div class="actions">
@@ -125,6 +124,7 @@
             (click)="previousQuestion()">
             ← Previous
           </button>
+          <button class="restart-btn" (click)="restartQuiz()">Restart Quiz</button>
         </div>
         
         <div class="main-actions">

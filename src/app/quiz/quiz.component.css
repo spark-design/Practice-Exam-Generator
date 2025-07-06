@@ -30,6 +30,8 @@ main{max-width:800px;margin:0 auto;padding:20px;font-family:Arial,sans-serif}
 .start-btn{padding:20px 40px;font-size:22px;background:#28a745;color:white;border:none;border-radius:10px;cursor:pointer;width:250px}
 .secondary-buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .start-btn:hover{background:#218838}
+.restart-btn{padding:10px 20px;background:#dc3545;color:white;border:none;border-radius:5px;cursor:pointer;margin-left:10px}
+.restart-btn:hover{background:#c82333}
 .back-btn{padding:8px 16px;background:#6c757d;color:white;border:none;border-radius:5px;cursor:pointer;margin-bottom:20px}
 .back-btn:hover{background:#5a6268}
 .final-score button{margin:0 10px}

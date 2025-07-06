@@ -28,6 +28,9 @@ export class QuizComponent implements OnInit {
   // Track answers and results for each question
   questionAnswers = new Map<number, Set<string>>();
   questionResults = new Map<number, { isCorrect: boolean; submitted: boolean }>();
+  
+  // Track if there's a quiz in progress
+  hasQuizInProgress = false;
 
   bulkQuestions = '';
   showBulkImport = false;
@@ -115,11 +118,19 @@ export class QuizComponent implements OnInit {
     this.quizCompleted = false;
     this.questionAnswers.clear();
     this.questionResults.clear();
+    this.hasQuizInProgress = false;
+    this.randomizeQuestions();
+    this.loadQuestionState();
   }
 
   startQuiz() {
-    this.randomizeQuestions();
+    if (!this.hasQuizInProgress) {
+      this.randomizeQuestions();
+    }
     this.showQuiz = true;
+    this.showBulkImport = false;
+    this.showManageQuestions = false;
+    this.hasQuizInProgress = true;
     this.loadQuestionState();
   }
 
@@ -140,15 +151,19 @@ export class QuizComponent implements OnInit {
     this.showManageQuestions = false;
     this.selectedQuestions.clear();
     this.expandedQuestions.clear();
-    this.restartQuiz();
+    // Don't reset quiz progress when going back to main
   }
 
   showBulkImportForm() {
     this.showBulkImport = true;
+    this.showManageQuestions = false;
+    this.showQuiz = false;
   }
 
   showManageQuestionsForm() {
     this.showManageQuestions = true;
+    this.showBulkImport = false;
+    this.showQuiz = false;
   }
 
 
