@@ -31,6 +31,10 @@ export class QuizComponent implements OnInit {
   
   // Track if there's a quiz in progress
   hasQuizInProgress = false;
+  
+  // AI explanation state
+  explanations = new Map<number, string>();
+  loadingExplanation = false;
 
   bulkQuestions = '';
   showBulkImport = false;
@@ -119,6 +123,8 @@ export class QuizComponent implements OnInit {
     this.questionAnswers.clear();
     this.questionResults.clear();
     this.hasQuizInProgress = false;
+    this.explanations.clear();
+    this.loadingExplanation = false;
     this.randomizeQuestions();
     this.loadQuestionState();
   }
@@ -454,6 +460,36 @@ export class QuizComponent implements OnInit {
     }
     
     return '';
+  }
+  
+  async getAIExplanation() {
+    if (this.loadingExplanation || this.explanations.has(this.currentQuestionIndex)) return;
+    
+    this.loadingExplanation = true;
+    
+    try {
+      const question = this.currentQuestion;
+      const options = `A) ${question.optionA}, B) ${question.optionB}, C) ${question.optionC}, D) ${question.optionD}${question.optionE ? `, E) ${question.optionE}` : ''}${question.optionF ? `, F) ${question.optionF}` : ''}`;
+      const userAnswer = Array.from(this.selectedAnswers).join('');
+      
+      const { data } = await client.functions.aiExplain({
+        question: question.question,
+        options,
+        correctAnswer: question.correctAnswer,
+        userAnswer,
+        isCorrect: this.isCorrect
+      });
+      
+      this.explanations.set(this.currentQuestionIndex, data.explanation);
+    } catch (error) {
+      console.error('Error getting AI explanation:', error);
+    } finally {
+      this.loadingExplanation = false;
+    }
+  }
+  
+  getExplanation(): string {
+    return this.explanations.get(this.currentQuestionIndex) || '';
   }
 
 

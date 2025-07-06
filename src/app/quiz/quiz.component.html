@@ -114,6 +114,15 @@
         <div [class]="isCorrect ? 'correct' : 'incorrect'">
           {{isCorrect ? '✓ Correct!' : '✗ Incorrect'}}
         </div>
+        <button 
+          class="ai-explain-btn"
+          [disabled]="loadingExplanation"
+          (click)="getAIExplanation()">
+          {{loadingExplanation ? 'Loading...' : '🤖 AI Explain'}}
+        </button>
+        <div *ngIf="getExplanation()" class="ai-explanation">
+          {{getExplanation()}}
+        </div>
       </div>
 
       <div class="actions">

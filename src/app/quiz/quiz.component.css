@@ -161,6 +161,36 @@ main{max-width:800px;margin:0 auto;padding:20px;font-family:Arial,sans-serif}
   font-weight: bold;
   color: #856404;
 }
+
+.ai-explain-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #6f42c1;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.ai-explain-btn:hover:not(:disabled) {
+  background: #5a32a3;
+}
+
+.ai-explain-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.ai-explanation {
+  margin-top: 15px;
+  padding: 15px;
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 5px;
+  color: #0056b3;
+  line-height: 1.5;
+}
 .original-number {
   font-size: 0.8em;
   color: #666;
